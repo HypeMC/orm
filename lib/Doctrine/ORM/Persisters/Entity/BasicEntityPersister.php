@@ -35,6 +35,7 @@ use Doctrine\ORM\Mapping\QuoteStrategy;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Persisters\ComparisonToSqlMap;
 use Doctrine\ORM\Persisters\SqlExpressionVisitor;
 use Doctrine\ORM\Persisters\SqlValueVisitor;
 use Doctrine\ORM\Query;
@@ -99,21 +100,6 @@ use function trim;
  */
 class BasicEntityPersister implements EntityPersister
 {
-    /** @var array<string,string> */
-    private static $comparisonMap = [
-        Comparison::EQ          => '= %s',
-        Comparison::NEQ         => '!= %s',
-        Comparison::GT          => '> %s',
-        Comparison::GTE         => '>= %s',
-        Comparison::LT          => '< %s',
-        Comparison::LTE         => '<= %s',
-        Comparison::IN          => 'IN (%s)',
-        Comparison::NIN         => 'NOT IN (%s)',
-        Comparison::CONTAINS    => 'LIKE %s',
-        Comparison::STARTS_WITH => 'LIKE %s',
-        Comparison::ENDS_WITH   => 'LIKE %s',
-    ];
-
     /**
      * Metadata object that describes the mapping of the mapped entity class.
      *
@@ -1619,7 +1605,7 @@ class BasicEntityPersister implements EntityPersister
                     continue;
                 }
 
-                $selectedColumns[] = $column . ' ' . sprintf(self::$comparisonMap[$comparison], $placeholder);
+                $selectedColumns[] = $column . ' ' . sprintf(ComparisonToSqlMap::MAP[$comparison], $placeholder);
 
                 continue;
             }

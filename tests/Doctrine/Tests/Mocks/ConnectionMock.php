@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Doctrine\Tests\Mocks;
 
 use Doctrine\Common\EventManager;
+use Doctrine\DBAL\Cache\QueryCacheProfile;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Statement;
+use Doctrine\DBAL\ForwardCompatibility\Result;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Exception;
 
@@ -36,6 +38,9 @@ class ConnectionMock extends Connection
 
     /** @var array */
     private $_inserts = [];
+
+    /** @var array */
+    private $_executeQueries = [];
 
     /** @var array */
     private $_executeUpdates = [];
@@ -67,6 +72,16 @@ class ConnectionMock extends Connection
     public function insert($tableName, array $data, array $types = [])
     {
         $this->_inserts[$tableName][] = $data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function executeQuery($sql, array $params = [], $types = [], ?QueryCacheProfile $qcp = null)
+    {
+        $this->_executeQueries[] = ['query' => $sql, 'params' => $params, 'types' => $types];
+
+        return parent::executeQuery($sql, $params, $types, $qcp);
     }
 
     /**
@@ -158,6 +173,14 @@ class ConnectionMock extends Connection
     public function getInserts(): array
     {
         return $this->_inserts;
+    }
+
+    /**
+     * @return array
+     */
+    public function getExecuteQueries(): array
+    {
+        return $this->_executeQueries;
     }
 
     /**

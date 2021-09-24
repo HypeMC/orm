@@ -25,6 +25,7 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Persisters\ComparisonToSqlMap;
 use Doctrine\ORM\Persisters\SqlValueVisitor;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Utility\PersisterHelper;
@@ -263,7 +264,7 @@ class ManyToManyPersister extends AbstractCollectionPersister
             [$name, $value, $operator] = $parameter;
 
             $field          = $this->quoteStrategy->getColumnName($name, $targetClass, $this->platform);
-            $whereClauses[] = sprintf('te.%s %s ?', $field, $operator);
+            $whereClauses[] = sprintf('te.%s ' . ComparisonToSqlMap::MAP[$operator], $field, '?');
             $params[]       = $value;
             $paramTypes[]   = PersisterHelper::getTypeOfColumn($field, $targetClass, $this->em);
         }
