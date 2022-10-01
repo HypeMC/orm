@@ -13,6 +13,8 @@ use Doctrine\Tests\DbalTypes\GH8565ManagerPayloadType;
 use Doctrine\Tests\Mocks\ArrayResultFactory;
 use Doctrine\Tests\Models\CMS\CmsAddress;
 use Doctrine\Tests\Models\Company\CompanyPerson;
+use Doctrine\Tests\Models\Enums\Card;
+use Doctrine\Tests\Models\Enums\Suit;
 use Doctrine\Tests\Models\GH8565\GH8565Employee;
 use Doctrine\Tests\Models\GH8565\GH8565Manager;
 use Doctrine\Tests\Models\GH8565\GH8565Person;
@@ -154,5 +156,30 @@ class SimpleObjectHydratorTest extends HydrationTestCase
         $hydrator = new SimpleObjectHydrator($this->entityManager);
         $result   = $hydrator->hydrateAll($stmt, $rsm);
         self::assertEquals($result[0], $expectedEntity);
+    }
+
+    /**
+     * @requires PHP 8.1
+     */
+    public function testEnumsAreBuilt(): void
+    {
+        $rsm = new ResultSetMapping();
+        $rsm->addEntityResult(Card::class, 'r');
+        $rsm->addFieldResult('r', 'id_1', 'id');
+        $rsm->addFieldResult('r', 'suit_2', 'suit');
+        $rsm->addEnumResult('suit_2', Suit::class);
+        $resultSet = [
+            [
+                'id_1' => 1,
+                'suit_2' => 'C',
+            ],
+        ];
+
+        $stmt     = ArrayResultFactory::createFromArray($resultSet);
+        $hydrator = new SimpleObjectHydrator($this->entityManager);
+        $result   = $hydrator->hydrateAll($stmt, $rsm)[0];
+
+        self::assertEquals(Suit::Clubs, $result->suit);
+        self::assertEquals(Suit::Clubs, $this->entityManager->getUnitOfWork()->getOriginalEntityData($result)['suit']);
     }
 }
