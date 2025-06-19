@@ -466,6 +466,7 @@ class DatabaseDriver implements MappingDriver
         $primaryKeys = $this->getTablePrimaryKeys($this->tables[$tableName]);
         $foreignKeys = $this->tables[$tableName]->getForeignKeys();
 
+        $foreignKeyPosition = 1;
         foreach ($foreignKeys as $foreignKey) {
             $foreignTableName   = self::getReferencedTableName($foreignKey);
             $fkColumns          = self::getReferencingColumnNames($foreignKey);
@@ -481,7 +482,8 @@ class DatabaseDriver implements MappingDriver
             }
 
             if ($primaryKeys && in_array($localColumn, $primaryKeys, true)) {
-                $associationMapping['id'] = true;
+                $associationMapping['id']         = true;
+                $associationMapping['idPosition'] = $foreignKeyPosition++;
             }
 
             for ($i = 0, $fkColumnsCount = count($fkColumns); $i < $fkColumnsCount; $i++) {

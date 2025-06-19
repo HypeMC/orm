@@ -47,6 +47,7 @@ use function in_array;
 use function is_numeric;
 use function method_exists;
 use function strtolower;
+use function usort;
 
 /**
  * The SchemaTool is a tool to create/drop/update database schemas based on
@@ -301,7 +302,13 @@ class SchemaTool
 
             $pkColumns = [];
 
-            foreach ($class->identifier as $identifierField) {
+            $identifier = $class->identifier;
+            usort(
+                $identifier,
+                static fn (string $id1, string $id2) => ($class->identifierPositions[$id2] ?? 0) <=> ($class->identifierPositions[$id1] ?? 0),
+            );
+
+            foreach ($identifier as $identifierField) {
                 if (isset($class->fieldMappings[$identifierField])) {
                     $pkColumns[] = $this->quoteStrategy->getColumnName($identifierField, $class, $this->platform);
                 } elseif (isset($class->associationMappings[$identifierField])) {

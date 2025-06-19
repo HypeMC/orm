@@ -107,6 +107,7 @@ abstract class AssociationMapping implements ArrayAccess
      *     declared?: class-string|null,
      *     cache?: array<mixed>|null,
      *     id?: bool|null,
+     *     idPosition?: int,
      *     isOnDeleteCascade?: bool|null,
      *     originalClass?: class-string|null,
      *     originalField?: string|null,
@@ -145,6 +146,10 @@ abstract class AssociationMapping implements ArrayAccess
 
                 $mapping->joinTable = JoinTableMapping::fromMappingArray($value);
 
+                continue;
+            }
+
+            if ($key === 'idPosition') {
                 continue;
             }
 

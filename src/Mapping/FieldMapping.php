@@ -22,6 +22,7 @@ final class FieldMapping implements ArrayAccess
      * fields of an entity can have the id attribute, forming a composite key.
      */
     public bool|null $id                 = null;
+    public int|null $idPosition          = null;
     public bool|null $nullable           = null;
     public bool|null $notInsertable      = null;
     public bool|null $notUpdatable       = null;
@@ -92,6 +93,7 @@ final class FieldMapping implements ArrayAccess
      *     columnName: string,
      *     length?: int|null,
      *     id?: bool|null,
+     *     idPosition?: int,
      *     nullable?: bool|null,
      *     notInsertable?: bool|null,
      *     notUpdatable?: bool|null,

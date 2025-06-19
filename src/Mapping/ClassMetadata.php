@@ -329,6 +329,14 @@ class ClassMetadata implements PersistenceClassMetadata, Stringable
     public array $identifier = [];
 
     /**
+     * READ-ONLY: The position of fields that are part of the identifier/primary key
+     * of the mapped entity class.
+     *
+     * @phpstan-var array<string, int>
+     */
+    public array $identifierPositions = [];
+
+    /**
      * READ-ONLY: The inheritance mapping type used by the class.
      *
      * @phpstan-var self::INHERITANCE_TYPE_*
@@ -1227,7 +1235,8 @@ class ClassMetadata implements PersistenceClassMetadata, Stringable
             }
 
             if (! in_array($mapping->fieldName, $this->identifier, true)) {
-                $this->identifier[] = $mapping->fieldName;
+                $this->identifier[]                             = $mapping->fieldName;
+                $this->identifierPositions[$mapping->fieldName] = $mapping->idPosition;
             }
 
             // Check for composite key
@@ -1330,8 +1339,9 @@ class ClassMetadata implements PersistenceClassMetadata, Stringable
                 }
 
                 assert(is_string($mapping['fieldName']));
-                $this->identifier[]              = $mapping['fieldName'];
-                $this->containsForeignIdentifier = true;
+                $this->identifier[]                               = $mapping['fieldName'];
+                $this->identifierPositions[$mapping['fieldName']] = $mapping['idPosition'];
+                $this->containsForeignIdentifier                  = true;
             }
 
             // Check for composite key
@@ -1487,10 +1497,12 @@ class ClassMetadata implements PersistenceClassMetadata, Stringable
      * Mainly used by the ClassMetadataFactory to assign inherited identifiers.
      *
      * @phpstan-param list<mixed> $identifier
+     * @phpstan-param array<string, int> $identifierPositions
      */
-    public function setIdentifier(array $identifier): void
+    public function setIdentifier(array $identifier, array $identifierPositions = []): void
     {
         $this->identifier            = $identifier;
+        $this->identifierPositions   = $identifierPositions;
         $this->isIdentifierComposite = (count($this->identifier) > 1);
     }
 
